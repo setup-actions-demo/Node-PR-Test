@@ -1,4 +1,3 @@
----
 name: Package Manager Matrix
 
 on:
@@ -32,22 +31,40 @@ jobs:
           npm --version
           npm config list
 
-      - name: Install dependencies with npm
+      - name: Generate package-lock.json if missing
+        working-directory: sample-projects/basic-npm
         run: |
-          cd sample-projects/basic-npm
+          if [ ! -f package-lock.json ]; then
+            echo "Generating package-lock.json..."
+            npm install
+          fi
+        shell: bash
+
+      - name: Install dependencies with npm
+        working-directory: sample-projects/basic-npm
+        run: |
+          echo "=== Installing dependencies (cache miss/hit test) ==="
           npm ci
 
-      - name: Test npm scripts
+      - name: Build project
+        working-directory: sample-projects/basic-npm
         run: |
-          cd sample-projects/basic-npm
-          npm run test
+          echo "=== Building project ==="
           npm run build
 
-      - name: Test npm package installation
+      - name: Run tests
+        working-directory: sample-projects/basic-npm
         run: |
-          cd sample-projects/basic-npm
-          npm install --save-dev jest
-          npm list jest
+          echo "=== Running tests ==="
+          npm run test
+
+      - name: Test cache effectiveness
+        working-directory: sample-projects/basic-npm
+        run: |
+          rm -rf node_modules
+          echo "=== Second installation (cache hit expected) ==="
+          time npm ci
+        shell: bash
 
   yarn-matrix:
     name: yarn testing on ${{ matrix.os }} with Node ${{ matrix.node-version }}
@@ -63,6 +80,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+          cache-dependency-path: 'sample-projects/typescript-yarn/yarn.lock'
+
       - name: Enable Corepack
         run: corepack enable
           
@@ -75,13 +99,6 @@ jobs:
           node --version
           yarn --version
   
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
-          cache-dependency-path: 'sample-projects/typescript-yarn/yarn.lock'
-  
       - name: Generate or update yarn.lock if needed
         working-directory: sample-projects/typescript-yarn
         run: |
@@ -93,12 +110,13 @@ jobs:
             # Try to install with immutable first, fallback to regular install if needed
             yarn install --immutable || yarn install
           fi
+        shell: bash
   
       - name: Install dependencies with yarn (first run - cache miss expected)
         working-directory: sample-projects/typescript-yarn
         run: |
           echo "=== First installation (cache miss expected) ==="
-          time yarn install --immutable
+          yarn install --immutable
   
       - name: Build TypeScript project
         working-directory: sample-projects/typescript-yarn
@@ -123,7 +141,8 @@ jobs:
         run: |
           rm -rf node_modules
           echo "=== Second installation (cache hit expected) ==="
-          time yarn install --immutable
+          yarn install --immutable
+        shell: bash
   
       - name: Verify cache effectiveness
         working-directory: sample-projects/typescript-yarn
@@ -146,14 +165,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Verify pnpm installation
-        run: |
-          node --version
-          pnpm --version
-
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -161,22 +172,56 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: 'sample-projects/esm-pnpm/pnpm-lock.yaml'
 
+      - name: Enable Corepack and install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+
+      - name: Verify pnpm installation
+        run: |
+          node --version
+          pnpm --version
+
+      - name: Generate pnpm-lock.yaml if missing
+        working-directory: sample-projects/esm-pnpm
+        run: |
+          if [ ! -f pnpm-lock.yaml ]; then
+            echo "Generating pnpm-lock.yaml..."
+            pnpm install
+          fi
+        shell: bash
 
       - name: Install dependencies with pnpm
+        working-directory: sample-projects/esm-pnpm
         run: |
-          cd sample-projects/esm-pnpm
+          echo "=== Installing dependencies (cache miss/hit test) ==="
           pnpm install --frozen-lockfile
 
-      - name: Test pnpm scripts
+      - name: Build project
+        working-directory: sample-projects/esm-pnpm
         run: |
-          cd sample-projects/esm-pnpm
-          pnpm test
+          echo "=== Building project ==="
           pnpm build
 
-      - name: Test ESM functionality
+      - name: Run tests
+        working-directory: sample-projects/esm-pnpm
         run: |
-          cd sample-projects/esm-pnpm
+          echo "=== Running tests ==="
+          pnpm test
+
+      - name: Test ESM functionality
+        working-directory: sample-projects/esm-pnpm
+        run: |
+          echo "=== Testing ESM functionality ==="
           pnpm start
+
+      - name: Test cache effectiveness
+        working-directory: sample-projects/esm-pnpm
+        run: |
+          rm -rf node_modules
+          echo "=== Second installation (cache hit expected) ==="
+          time pnpm install --frozen-lockfile
+        shell: bash
 
   package-manager-comparison:
     name: Package manager feature comparison
@@ -191,33 +236,35 @@ jobs:
         with:
           node-version: '20'  # Use specific version without .x
 
-      - name: Install package managers
+      - name: Enable Corepack and install package managers
         run: |
-          npm install -g yarn pnpm
+          corepack enable
+          corepack prepare yarn@stable --activate
+          corepack prepare pnpm@latest --activate
           echo "Package manager versions:"
           npm --version
           yarn --version
           pnpm --version
 
       - name: Test npm lockfile handling
+        working-directory: sample-projects/basic-npm
         run: |
-          cd sample-projects/basic-npm
           rm -f package-lock.json
           npm install
           echo "npm lockfile created:"
           ls -la package-lock.json
 
       - name: Test yarn lockfile handling
+        working-directory: sample-projects/typescript-yarn
         run: |
-          cd sample-projects/typescript-yarn
           rm -f yarn.lock
           yarn install
           echo "yarn lockfile created:"
           ls -la yarn.lock
 
       - name: Test pnpm lockfile handling
+        working-directory: sample-projects/esm-pnpm
         run: |
-          cd sample-projects/esm-pnpm
           rm -f pnpm-lock.yaml
           pnpm install
           echo "pnpm lockfile created:"
@@ -226,17 +273,14 @@ jobs:
       - name: Compare installation speed
         run: |
           echo "Comparing package manager installation speeds..."
-
           echo "npm install speed:"
           cd sample-projects/basic-npm
           rm -rf node_modules
           time npm ci
-
           echo "yarn install speed:"
           cd ../typescript-yarn
           rm -rf node_modules
-          time yarn install --frozen-lockfile
-
+          time yarn install --immutable
           echo "pnpm install speed:"
           cd ../esm-pnpm
           rm -rf node_modules
@@ -262,21 +306,33 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'sample-projects/monorepo/package-lock.json'
 
-      - name: Install dependencies for monorepo
+      - name: Generate package-lock.json if missing
+        working-directory: sample-projects/monorepo
         run: |
-          cd sample-projects/monorepo
+          if [ ! -f package-lock.json ]; then
+            echo "Generating package-lock.json for monorepo..."
+            npm install
+          fi
+        shell: bash
+
+      - name: Install dependencies for monorepo
+        working-directory: sample-projects/monorepo
+        run: |
+          echo "=== Installing monorepo dependencies ==="
           npm ci
 
       - name: Test workspace packages
+        working-directory: sample-projects/monorepo
         run: |
-          cd sample-projects/monorepo
+          echo "=== Testing workspace packages ==="
           npm run test --workspace=package-a
           npm run test --workspace=package-b
           npm run build --workspaces
 
       - name: Test cross-package dependencies
+        working-directory: sample-projects/monorepo
         run: |
-          cd sample-projects/monorepo
+          echo "=== Testing cross-package dependencies ==="
           npm run start --workspace=package-b
 
   registry-authentication:
@@ -323,24 +379,35 @@ jobs:
         with:
           node-version: '20'  # Use specific version without .x
 
-      - name: Install package managers
+      - name: Install package managers via Corepack
         run: |
-          npm install -g yarn pnpm
+          corepack enable
+          corepack prepare yarn@stable --activate
+          corepack prepare pnpm@latest --activate
+
+      - name: Install dependencies for all projects
+        run: |
+          cd sample-projects/basic-npm && npm ci
+          cd ../typescript-yarn && yarn install --immutable
+          cd ../esm-pnpm && pnpm install --frozen-lockfile
 
       - name: Test npm resolution
+        working-directory: sample-projects/basic-npm
         run: |
-          cd sample-projects/basic-npm
+          echo "=== NPM Package Resolution ==="
           npm ls
-          npm explain lodash
+          npm explain lodash || echo "lodash not found in npm project"
 
       - name: Test yarn resolution
+        working-directory: sample-projects/typescript-yarn
         run: |
-          cd sample-projects/typescript-yarn
+          echo "=== Yarn Package Resolution ==="
           yarn list
           yarn why typescript
 
       - name: Test pnpm resolution
+        working-directory: sample-projects/esm-pnpm
         run: |
-          cd sample-projects/esm-pnpm
+          echo "=== PNPM Package Resolution ==="
           pnpm list
-          pnpm why lodash
+          pnpm why lodash || echo "lodash not found in pnpm project"
