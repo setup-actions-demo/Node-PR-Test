@@ -62,14 +62,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-  
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
-          cache-dependency-path: 'sample-projects/typescript-yarn/yarn.lock'
-  
+
       - name: Enable Corepack
         run: corepack enable
           
@@ -81,6 +74,13 @@ jobs:
         run: |
           node --version
           yarn --version
+  
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+          cache-dependency-path: 'sample-projects/typescript-yarn/yarn.lock'
   
       - name: Generate or update yarn.lock if needed
         working-directory: sample-projects/typescript-yarn
