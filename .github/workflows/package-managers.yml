@@ -1,196 +1,304 @@
 ---
-    name: Edge Cases Testing
-    
-    on:
-      workflow_dispatch:
-    
-    jobs:
-      nvmrc-test:
-        name: Test .nvmrc file resolution
-        runs-on: ${{ matrix.os }}
-    
-        strategy:
-          matrix:
-            os: [ubuntu-latest, windows-latest, macos-latest]
-    
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          - name: Setup Node.js from .nvmrc
-            uses: actions/setup-node@v4
-            with:
-              node-version-file: 'sample-projects/nvmrc-project/.nvmrc'
-    
-          - name: Verify Node.js version from .nvmrc
-            run: |
-              cd sample-projects/nvmrc-project
-              node --version
-              expected=$(cat .nvmrc)
-              actual=$(node --version)
-              echo "Expected: $expected"
-              echo "Actual: $actual"
-    
-      engines-test:
-        name: Test package.json engines field
-        runs-on: ${{ matrix.os }}
-    
-        strategy:
-          fail-fast: false
-          matrix:
-            os: [ubuntu-latest, windows-latest, macos-latest]
-    
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          - name: Setup Node.js from package.json engines
-            uses: actions/setup-node@v4
-            with:
-              node-version-file: 'sample-projects/engines-project/package.json'
-    
-          - name: Verify Node.js version matches engines
-            run: |
-              cd sample-projects/engines-project
-              node --version
-              npm --version
-    
-      version-resolution:
-        name: Test version resolution and fallbacks
-        runs-on: ubuntu-latest
-    
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          - name: Test exact version specification
-            uses: actions/setup-node@v4
-            with:
-              node-version: '20.11.0'
-          - run: node --version
-    
-          - name: Test version range specification
-            uses: actions/setup-node@v4
-            with:
-              node-version: '>=20'
-          - run: node --version
-    
-          - name: Test latest version specification
-            uses: actions/setup-node@v4
-            with:
-              node-version: 'latest'
-          - run: node --version
-    
-          - name: Test LTS version specification
-            uses: actions/setup-node@v4
-            with:
-              node-version: 'lts/*'
-          - run: node --version
-    
-      multiple-versions:
-        name: Test multiple Node.js versions in single job
-        runs-on: ubuntu-latest
-    
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          - name: Setup Node.js 18
-            uses: actions/setup-node@v4
-            with:
-              node-version: '18.x'
-          - name: Test Node.js 18
-            run: |
-              node --version
-              echo "Node 18 test passed"
-    
-          - name: Setup Node.js 20
-            uses: actions/setup-node@v4
-            with:
-              node-version: '20.x'
-          - name: Test Node.js 20
-            run: |
-              node --version
-              echo "Node 20 test passed"
-    
-          - name: Setup Node.js 22
-            uses: actions/setup-node@v4
-            with:
-              node-version: '22.x'
-          - name: Test Node.js 22
-            run: |
-              node --version
-              echo "Node 22 test passed"
-    
-      registry-test:
-        name: Test custom registry configuration
-        runs-on: ubuntu-latest
-    
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          - name: Setup Node.js with custom registry
-            uses: actions/setup-node@v4
-            with:
-              node-version: '20.x'
-              registry-url: 'https://registry.npmjs.org/'
-    
-          - name: Test registry configuration
-            run: |
-              node --version
-              npm config get registry
-    
-          - name: Test scoped registry
-            uses: actions/setup-node@v4
-            with:
-              node-version: '20.x'
-              registry-url: 'https://npm.pkg.github.com'
-              scope: '@octocat'
-    
-          - name: Verify scoped registry configuration
-            run: |
-              npm config get @octocat:registry
-    
-      architecture-test:
-        name: Test architecture-specific installations
-        runs-on: ${{ matrix.os }}
-    
-        strategy:
-          matrix:
-            os: [ubuntu-latest, windows-latest, macos-latest]
-    
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          - name: Setup Node.js
-            uses: actions/setup-node@v4
-            with:
-              node-version: '20.x'
-              architecture: ${{ runner.arch }}
-    
-          - name: Verify architecture
-            run: |
-              node --version
-              node -e "console.log('Architecture:', process.arch)"
-              node -e "console.log('Platform:', process.platform)"
-    
-      error-handling:
-        name: Test error handling and edge cases
-        runs-on: ubuntu-latest
-    
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          - name: Test with valid version
-            uses: actions/setup-node@v4
-            with:
-              node-version: '20.x'
-    
-          - name: Verify successful setup
-            run: |
-              node --version
-              echo "Valid version test passed"
-    
+name: Package Manager Matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  npm-matrix:
+    name: npm testing on ${{ matrix.os }} with Node ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false  # Need results from all OS/Node.js combinations
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04, windows-latest, macos-latest]
+        node-version: ['18.x', '20.x', '22.x', '23.x']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'sample-projects/basic-npm/package-lock.json'
+
+      - name: Verify npm installation
+        run: |
+          node --version
+          npm --version
+          npm config list
+
+      - name: Install dependencies with npm
+        run: |
+          cd sample-projects/basic-npm
+          npm ci
+
+      - name: Test npm scripts
+        run: |
+          cd sample-projects/basic-npm
+          npm run test
+          npm run build
+
+      - name: Test npm package installation
+        run: |
+          cd sample-projects/basic-npm
+          npm install --save-dev jest
+          npm list jest
+
+  yarn-matrix:
+    name: yarn testing on ${{ matrix.os }} with Node ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false  # Need results from all OS/Node.js combinations
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: ['18.x', '20.x', '22.x']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+          cache-dependency-path: 'sample-projects/typescript-yarn/yarn.lock'
+
+      - name: Verify yarn installation
+        run: |
+          node --version
+          yarn --version
+
+      - name: Install dependencies with yarn
+        run: |
+          cd sample-projects/typescript-yarn
+          yarn install --frozen-lockfile
+
+      - name: Test yarn scripts
+        run: |
+          cd sample-projects/typescript-yarn
+          yarn test
+          yarn build
+
+      - name: Test TypeScript compilation
+        run: |
+          cd sample-projects/typescript-yarn
+          yarn tsc --noEmit
+
+  pnpm-matrix:
+    name: pnpm testing on ${{ matrix.os }} with Node ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false  # Need results from all OS/Node.js combinations
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: ['18.x', '20.x', '22.x']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: 'sample-projects/esm-pnpm/pnpm-lock.yaml'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Verify pnpm installation
+        run: |
+          node --version
+          pnpm --version
+
+      - name: Install dependencies with pnpm
+        run: |
+          cd sample-projects/esm-pnpm
+          pnpm install --frozen-lockfile
+
+      - name: Test pnpm scripts
+        run: |
+          cd sample-projects/esm-pnpm
+          pnpm test
+          pnpm build
+
+      - name: Test ESM functionality
+        run: |
+          cd sample-projects/esm-pnpm
+          pnpm start
+
+  package-manager-comparison:
+    name: Package manager feature comparison
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install package managers
+        run: |
+          npm install -g yarn pnpm
+          echo "Package manager versions:"
+          npm --version
+          yarn --version
+          pnpm --version
+
+      - name: Test npm lockfile handling
+        run: |
+          cd sample-projects/basic-npm
+          rm -f package-lock.json
+          npm install
+          echo "npm lockfile created:"
+          ls -la package-lock.json
+
+      - name: Test yarn lockfile handling
+        run: |
+          cd sample-projects/typescript-yarn
+          rm -f yarn.lock
+          yarn install
+          echo "yarn lockfile created:"
+          ls -la yarn.lock
+
+      - name: Test pnpm lockfile handling
+        run: |
+          cd sample-projects/esm-pnpm
+          rm -f pnpm-lock.yaml
+          pnpm install
+          echo "pnpm lockfile created:"
+          ls -la pnpm-lock.yaml
+
+      - name: Compare installation speed
+        run: |
+          echo "Comparing package manager installation speeds..."
+
+          echo "npm install speed:"
+          cd sample-projects/basic-npm
+          rm -rf node_modules
+          time npm ci
+
+          echo "yarn install speed:"
+          cd ../typescript-yarn
+          rm -rf node_modules
+          time yarn install --frozen-lockfile
+
+          echo "pnpm install speed:"
+          cd ../esm-pnpm
+          rm -rf node_modules
+          time pnpm install --frozen-lockfile
+
+  workspace-monorepo-test:
+    name: Test monorepo workspace functionality
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: 'sample-projects/monorepo/package-lock.json'
+
+      - name: Install dependencies for monorepo
+        run: |
+          cd sample-projects/monorepo
+          npm ci
+
+      - name: Test workspace packages
+        run: |
+          cd sample-projects/monorepo
+          npm run test --workspace=package-a
+          npm run test --workspace=package-b
+          npm run build --workspaces
+
+      - name: Test cross-package dependencies
+        run: |
+          cd sample-projects/monorepo
+          npm run start --workspace=package-b
+
+  registry-authentication:
+    name: Test package registry configurations
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test npm registry configuration
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Verify npm registry
+        run: |
+          npm config get registry
+          echo "Registry configuration verified"
+
+      - name: Test scoped registry configuration
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@octocat'
+
+      - name: Verify scoped registry
+        run: |
+          npm config get @octocat:registry
+          echo "Scoped registry configuration verified"
+
+  package-resolution:
+    name: Test package resolution strategies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install package managers
+        run: |
+          npm install -g yarn pnpm
+
+      - name: Test npm resolution
+        run: |
+          cd sample-projects/basic-npm
+          npm ls
+          npm explain lodash
+
+      - name: Test yarn resolution
+        run: |
+          cd sample-projects/typescript-yarn
+          yarn list
+          yarn why typescript
+
+      - name: Test pnpm resolution
+        run: |
+          cd sample-projects/esm-pnpm
+          pnpm list
+          pnpm why lodash
