@@ -63,4 +63,6 @@ jobs:
           node -e "const _ = require('lodash'); console.log('Lodash version:', _.VERSION);"
 
       - name: Clean up (cross-platform)
-        run: node -e "const fs = require('fs'); try { fs.rmSync('test-project', { recursive: true, force: true }); console.log('Cleanup completed'); } catch(e) { console.log('Cleanup not needed or failed:', e.message); }"
+        run: |
+          node -e "const fs = require('fs'); try { fs.rmSync('test-project', { recursive: true, force: true });
+          console.log('Cleanup completed'); } catch(e) { console.log('Cleanup not needed or failed:', e.message); }"
