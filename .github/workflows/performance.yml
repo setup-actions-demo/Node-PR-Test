@@ -85,7 +85,7 @@
             run: |
               cd sample-projects/basic-npm
               rm -rf node_modules
-    
+            shell: bash
           - name: Measure npm install time (second run - cache hit)
             run: |
               cd sample-projects/basic-npm
