@@ -91,6 +91,7 @@
               cd sample-projects/basic-npm
               echo "Second npm install (cache hit):"
               time npm ci
+            shell: bash
     
       package-manager-performance:
         name: Package manager performance comparison
