@@ -1,63 +1,66 @@
----
-    name: Main Testing Matrix
-    
-    on:
-      workflow_dispatch:
-    
-    jobs:
-      test-matrix:
-        name: Test Node ${{ matrix.node-version }} on ${{ matrix.os }}
-        runs-on: ${{ matrix.os }}
-    
-        strategy:
-          fail-fast: false  # Need results from all OS/Node.js combinations
-          matrix:
-            os:
-              - ubuntu-latest
-              - windows-latest
-              - macos-latest
-            node-version:
-              - '18.x'
-              - '20.x'
-              - '22.x'
-              - '23.x'
-    
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          - name: Setup Node.js ${{ matrix.node-version }}
-            uses: actions/setup-node@v4
-            with:
-              node-version: ${{ matrix.node-version }}
-    
-          - name: Verify Node.js installation
-            run: |
-              node --version
-              npm --version
-              echo "Node.js version: $(node --version)"
-              echo "npm version: $(npm --version)"
-    
-          - name: Test basic Node.js functionality
-            run: |
-              node -e "console.log('Hello from Node.js ' + process.version)"
-              node -e "console.log('Platform: ' + process.platform)"
-              node -e "console.log('Architecture: ' + process.arch)"
-    
-          - name: Test npm functionality
-            run: |
-              npm config list
-              npm --version
-    
-          - name: Create and test a basic project
-            run: |
-              mkdir test-project
-              cd test-project
-              npm init -y
-              echo "console.log('Test project works!');" > index.js
-              node index.js
-    
-          - name: Clean up
-            run: |
-              rm -rf test-project
-    
+name: Main Testing Matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-matrix:
+    name: Test Node ${{ matrix.node-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false  # Need results from all OS/Node.js combinations
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        node-version:
+          - '18.x'
+          - '20.x'
+          - '22.x'
+          - '23.x'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Verify Node.js installation
+        run: |
+          node --version
+          npm --version
+          echo "Node.js version: $(node --version)"
+          echo "npm version: $(npm --version)"
+
+      - name: Test basic Node.js functionality
+        run: |
+          node -e "console.log('Hello from Node.js ' + process.version)"
+          node -e "console.log('Platform: ' + process.platform)"
+          node -e "console.log('Architecture: ' + process.arch)"
+
+      - name: Test npm functionality
+        run: |
+          npm config list
+          npm --version
+
+      - name: Create and test a basic project
+        run: |
+          mkdir test-project
+          cd test-project
+          npm init -y
+          echo "console.log('Test project works!');" > index.js
+          node index.js
+
+      - name: Test package installation
+        run: |
+          cd test-project
+          npm install lodash
+          node -e "const _ = require('lodash'); console.log('Lodash version:', _.VERSION);"
+
+      - name: Clean up (cross-platform)
+        run: node -e "const fs = require('fs'); try { fs.rmSync('test-project', { recursive: true, force: true }); console.log('Cleanup completed'); } catch(e) { console.log('Cleanup not needed or failed:', e.message); }"
