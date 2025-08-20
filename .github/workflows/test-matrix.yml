@@ -14,12 +14,8 @@
           matrix:
             os:
               - ubuntu-latest
-              - ubuntu-20.04
               - windows-latest
-              - windows-2019
               - macos-latest
-              - macos-13
-              - macos-12
             node-version:
               - '18.x'
               - '20.x'
