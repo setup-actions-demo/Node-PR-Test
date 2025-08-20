@@ -1,0 +1,21 @@
+{
+  "name": "nvmrc-project",
+  "version": "1.0.0",
+  "description": "Project with .nvmrc file for setup-node testing",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "keywords": [
+    "nodejs",
+    "nvmrc",
+    "testing",
+    "setup-node"
+  ],
+  "author": "setup-node-test",
+  "license": "MIT"
+}

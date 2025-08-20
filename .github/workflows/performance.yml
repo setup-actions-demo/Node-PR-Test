@@ -1,0 +1,246 @@
+---
+    name: Performance Benchmarking
+    
+    on:
+      workflow_dispatch:
+    
+    jobs:
+      setup-performance:
+        name: Node.js setup performance on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+    
+        strategy:
+          fail-fast: false
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+            node-version: ['18.x', '20.x', '22.x', '23.x']
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Measure setup time
+            run: |
+              echo "Starting Node.js setup benchmark..."
+              start_time=$(date +%s%N)
+              echo "START_TIME=${start_time}" >> $GITHUB_ENV
+    
+          - name: Setup Node.js ${{ matrix.node-version }}
+            uses: actions/setup-node@v4
+            with:
+              node-version: ${{ matrix.node-version }}
+    
+          - name: Calculate setup time
+            run: |
+              end_time=$(date +%s%N)
+              setup_time=$(( ($end_time - $START_TIME) / 1000000 ))
+              echo "Node.js ${{ matrix.node-version }} setup time: \
+                ${setup_time}ms on ${{ matrix.os }}"
+              echo "SETUP_TIME=${setup_time}" >> $GITHUB_ENV
+    
+          - name: Verify installation
+            run: |
+              node --version
+              npm --version
+    
+          - name: Test basic operations performance
+            run: |
+              echo "Testing basic Node.js operations..."
+              time node -e "console.log('Hello World')"
+              time node -e "const fs = require('fs'); \
+                fs.readFileSync('README.md', 'utf8')"
+              time npm --version
+    
+      cache-performance:
+        name: Cache performance testing
+        runs-on: ${{ matrix.os }}
+    
+        strategy:
+          fail-fast: false
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js with npm cache
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+              cache: 'npm'
+              cache-dependency-path: 'sample-projects/basic-npm/package-lock.json'
+    
+          - name: Measure npm install time (first run - cache miss)
+            run: |
+              cd sample-projects/basic-npm
+              echo "First npm install (cache miss):"
+              time npm ci
+    
+          - name: Clear node_modules for cache test
+            run: |
+              cd sample-projects/basic-npm
+              rm -rf node_modules
+    
+          - name: Measure npm install time (second run - cache hit)
+            run: |
+              cd sample-projects/basic-npm
+              echo "Second npm install (cache hit):"
+              time npm ci
+    
+      package-manager-performance:
+        name: Package manager performance comparison
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+    
+          - name: Install package managers
+            run: |
+              npm install -g yarn pnpm
+              echo "Package manager versions:"
+              npm --version
+              yarn --version
+              pnpm --version
+    
+          - name: Benchmark npm performance
+            run: |
+              echo "Benchmarking npm..."
+              cd sample-projects/basic-npm
+              rm -rf node_modules package-lock.json
+              npm install
+              time npm install
+    
+          - name: Benchmark yarn performance
+            run: |
+              echo "Benchmarking yarn..."
+              cd sample-projects/typescript-yarn
+              rm -rf node_modules yarn.lock
+              yarn install
+              time yarn install
+    
+          - name: Benchmark pnpm performance
+            run: |
+              echo "Benchmarking pnpm..."
+              cd sample-projects/esm-pnpm
+              rm -rf node_modules pnpm-lock.yaml
+              pnpm install
+              time pnpm install
+    
+      resource-monitoring:
+        name: Resource usage monitoring
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Monitor system resources before setup
+            run: |
+              echo "System resources before Node.js setup:"
+              free -h
+              df -h
+              ps aux --sort=-%mem | head -10
+    
+          - name: Setup Node.js with resource monitoring
+            run: |
+              echo "Setting up Node.js..."
+              ps aux --sort=-%mem | head -5 > before_setup.log
+    
+          - uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+              cache: 'npm'
+              cache-dependency-path: 'sample-projects/basic-npm/package-lock.json'
+    
+          - name: Monitor system resources after setup
+            run: |
+              echo "System resources after Node.js setup:"
+              free -h
+              df -h
+              ps aux --sort=-%mem | head -10
+    
+          - name: Install dependencies with resource monitoring
+            run: |
+              cd sample-projects/basic-npm
+              echo "Installing dependencies..."
+              time npm ci
+              echo "Memory usage after npm install:"
+              free -h
+    
+      version-switching-performance:
+        name: Node.js version switching performance
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Test multiple version switches
+            run: |
+              echo "Testing Node.js version switching performance..."
+    
+          - name: Setup Node.js 18
+            uses: actions/setup-node@v4
+            with:
+              node-version: '18.x'
+          - run: |
+              echo "Node.js 18 setup complete: $(node --version)"
+              time node -e "console.log('Node 18 test')"
+    
+          - name: Switch to Node.js 20
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+          - run: |
+              echo "Node.js 20 setup complete: $(node --version)"
+              time node -e "console.log('Node 20 test')"
+    
+          - name: Switch to Node.js 22
+            uses: actions/setup-node@v4
+            with:
+              node-version: '22.x'
+          - run: |
+              echo "Node.js 22 setup complete: $(node --version)"
+              time node -e "console.log('Node 22 test')"
+    
+          - name: Switch back to Node.js 20
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+          - run: |
+              echo "Switched back to Node.js 20: $(node --version)"
+              time node -e "console.log('Back to Node 20')"
+    
+      concurrent-setup-test:
+        name: Test concurrent Node.js setups
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Test concurrent setups
+            run: |
+              echo "Testing concurrent Node.js operations..."
+    
+          - name: Setup Node.js for concurrent test
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+    
+          - name: Run concurrent Node.js processes
+            run: |
+              echo "Running concurrent Node.js processes..."
+              node -e "setTimeout(() => console.log('Process 1 complete'), 1000)" &
+              node -e "setTimeout(() => console.log('Process 2 complete'), 1000)" &
+              node -e "setTimeout(() => console.log('Process 3 complete'), 1000)" &
+              wait
+              echo "All concurrent processes completed"
+    

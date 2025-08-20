@@ -1,0 +1,25 @@
+{
+  "name": "engines-project",
+  "version": "1.0.0",
+  "description": "Project with engines field for setup-node testing",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0 <23.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "semver": "^7.5.0"
+  },
+  "keywords": [
+    "nodejs",
+    "engines",
+    "testing",
+    "setup-node"
+  ],
+  "author": "setup-node-test",
+  "license": "MIT"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@monorepo/package-a",
+  "version": "1.0.0",
+  "description": "Package A in monorepo",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js",
+    "build": "echo 'Building package A'"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "keywords": [
+    "monorepo",
+    "package-a"
+  ],
+  "author": "setup-node-test",
+  "license": "MIT"
+}

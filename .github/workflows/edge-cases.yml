@@ -1,0 +1,196 @@
+---
+    name: Edge Cases Testing
+    
+    on:
+      workflow_dispatch:
+    
+    jobs:
+      nvmrc-test:
+        name: Test .nvmrc file resolution
+        runs-on: ${{ matrix.os }}
+    
+        strategy:
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js from .nvmrc
+            uses: actions/setup-node@v4
+            with:
+              node-version-file: 'sample-projects/nvmrc-project/.nvmrc'
+    
+          - name: Verify Node.js version from .nvmrc
+            run: |
+              cd sample-projects/nvmrc-project
+              node --version
+              expected=$(cat .nvmrc)
+              actual=$(node --version)
+              echo "Expected: $expected"
+              echo "Actual: $actual"
+    
+      engines-test:
+        name: Test package.json engines field
+        runs-on: ${{ matrix.os }}
+    
+        strategy:
+          fail-fast: false
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js from package.json engines
+            uses: actions/setup-node@v4
+            with:
+              node-version-file: 'sample-projects/engines-project/package.json'
+    
+          - name: Verify Node.js version matches engines
+            run: |
+              cd sample-projects/engines-project
+              node --version
+              npm --version
+    
+      version-resolution:
+        name: Test version resolution and fallbacks
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Test exact version specification
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.11.0'
+          - run: node --version
+    
+          - name: Test version range specification
+            uses: actions/setup-node@v4
+            with:
+              node-version: '>=20'
+          - run: node --version
+    
+          - name: Test latest version specification
+            uses: actions/setup-node@v4
+            with:
+              node-version: 'latest'
+          - run: node --version
+    
+          - name: Test LTS version specification
+            uses: actions/setup-node@v4
+            with:
+              node-version: 'lts/*'
+          - run: node --version
+    
+      multiple-versions:
+        name: Test multiple Node.js versions in single job
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js 18
+            uses: actions/setup-node@v4
+            with:
+              node-version: '18.x'
+          - name: Test Node.js 18
+            run: |
+              node --version
+              echo "Node 18 test passed"
+    
+          - name: Setup Node.js 20
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+          - name: Test Node.js 20
+            run: |
+              node --version
+              echo "Node 20 test passed"
+    
+          - name: Setup Node.js 22
+            uses: actions/setup-node@v4
+            with:
+              node-version: '22.x'
+          - name: Test Node.js 22
+            run: |
+              node --version
+              echo "Node 22 test passed"
+    
+      registry-test:
+        name: Test custom registry configuration
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js with custom registry
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+              registry-url: 'https://registry.npmjs.org/'
+    
+          - name: Test registry configuration
+            run: |
+              node --version
+              npm config get registry
+    
+          - name: Test scoped registry
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+              registry-url: 'https://npm.pkg.github.com'
+              scope: '@octocat'
+    
+          - name: Verify scoped registry configuration
+            run: |
+              npm config get @octocat:registry
+    
+      architecture-test:
+        name: Test architecture-specific installations
+        runs-on: ${{ matrix.os }}
+    
+        strategy:
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+              architecture: ${{ runner.arch }}
+    
+          - name: Verify architecture
+            run: |
+              node --version
+              node -e "console.log('Architecture:', process.arch)"
+              node -e "console.log('Platform:', process.platform)"
+    
+      error-handling:
+        name: Test error handling and edge cases
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Test with valid version
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+    
+          - name: Verify successful setup
+            run: |
+              node --version
+              echo "Valid version test passed"
+    

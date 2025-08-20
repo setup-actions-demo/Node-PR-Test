@@ -1,0 +1,26 @@
+{
+  "name": "monorepo-project",
+  "version": "1.0.0",
+  "description": "Monorepo project for setup-node testing",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "start": "npm run start --workspace=package-b"
+  },
+  "devDependencies": {
+    "lerna": "^7.0.0"
+  },
+  "keywords": [
+    "nodejs",
+    "monorepo",
+    "workspaces",
+    "testing",
+    "setup-node"
+  ],
+  "author": "setup-node-test",
+  "license": "MIT"
+}

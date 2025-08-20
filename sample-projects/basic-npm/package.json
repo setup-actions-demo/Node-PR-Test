@@ -1,0 +1,25 @@
+{
+  "name": "basic-npm-project",
+  "version": "1.0.0",
+  "description": "Basic Node.js project using npm for setup-node testing",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js",
+    "build": "echo 'Build completed for basic npm project'"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "keywords": [
+    "nodejs",
+    "npm",
+    "testing",
+    "setup-node"
+  ],
+  "author": "setup-node-test",
+  "license": "MIT"
+}

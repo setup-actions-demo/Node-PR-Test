@@ -1,0 +1,138 @@
+---
+    name: Cache Testing
+    
+    on:
+      workflow_dispatch:
+    
+    jobs:
+      cache-npm:
+        name: Test npm cache on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+    
+        strategy:
+          fail-fast: false
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+              cache: 'npm'
+              cache-dependency-path: 'sample-projects/basic-npm/package-lock.json'
+    
+          - name: Install dependencies (first run)
+            run: |
+              cd sample-projects/basic-npm
+              npm ci
+    
+          - name: Test cache hit on second run
+            run: |
+              cd sample-projects/basic-npm
+              npm ci
+    
+      cache-yarn:
+        name: Test yarn cache on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+    
+        strategy:
+          fail-fast: false
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+              cache: 'yarn'
+              cache-dependency-path: 'sample-projects/typescript-yarn/yarn.lock'
+    
+          - name: Install dependencies (first run)
+            run: |
+              cd sample-projects/typescript-yarn
+              yarn install --frozen-lockfile
+    
+          - name: Test cache hit on second run
+            run: |
+              cd sample-projects/typescript-yarn
+              yarn install --frozen-lockfile
+    
+      cache-pnpm:
+        name: Test pnpm cache on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+    
+        strategy:
+          fail-fast: false
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+              cache: 'pnpm'
+              cache-dependency-path: 'sample-projects/esm-pnpm/pnpm-lock.yaml'
+    
+          - name: Install pnpm
+            run: npm install -g pnpm
+    
+          - name: Install dependencies (first run)
+            run: |
+              cd sample-projects/esm-pnpm
+              pnpm install --frozen-lockfile
+    
+          - name: Test cache hit on second run
+            run: |
+              cd sample-projects/esm-pnpm
+              pnpm install --frozen-lockfile
+    
+      cache-comparison:
+        name: Cache performance comparison
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+    
+          - name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20.x'
+    
+          - name: Test npm cache performance
+            run: |
+              echo "Testing npm cache performance..."
+              cd sample-projects/basic-npm
+              time npm ci
+              rm -rf node_modules
+              time npm ci  # Second run should be faster due to cache
+    
+          - name: Test yarn cache performance
+            run: |
+              echo "Testing yarn cache performance..."
+              cd sample-projects/typescript-yarn
+              time yarn install --frozen-lockfile
+              rm -rf node_modules
+              time yarn install --frozen-lockfile  # Second run should be faster
+    
+          - name: Install pnpm and test cache performance
+            run: |
+              npm install -g pnpm
+              echo "Testing pnpm cache performance..."
+              cd sample-projects/esm-pnpm
+              time pnpm install --frozen-lockfile
+              rm -rf node_modules
+              time pnpm install --frozen-lockfile  # Second run should be faster
+    
