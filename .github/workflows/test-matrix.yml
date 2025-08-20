@@ -1,6 +1,12 @@
 name: Main Testing Matrix
 
 on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -26,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: priya-kinthali/setup-node@sample-686
         with:
           node-version: ${{ matrix.node-version }}
 
