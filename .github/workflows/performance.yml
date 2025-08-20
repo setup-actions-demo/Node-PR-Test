@@ -38,7 +38,8 @@
               echo "Node.js ${{ matrix.node-version }} setup time: \
                 ${setup_time}ms on ${{ matrix.os }}"
               echo "SETUP_TIME=${setup_time}" >> $GITHUB_ENV
-    
+            shell: bash
+            
           - name: Verify installation
             run: |
               node --version
@@ -51,7 +52,8 @@
               time node -e "const fs = require('fs'); \
                 fs.readFileSync('README.md', 'utf8')"
               time npm --version
-    
+            shell: bash
+            
       cache-performance:
         name: Cache performance testing
         runs-on: ${{ matrix.os }}
@@ -77,6 +79,7 @@
               cd sample-projects/basic-npm
               echo "First npm install (cache miss):"
               time npm ci
+            shell: bash
     
           - name: Clear node_modules for cache test
             run: |
