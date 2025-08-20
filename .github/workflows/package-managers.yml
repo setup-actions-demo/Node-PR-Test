@@ -13,7 +13,7 @@ jobs:
       fail-fast: false  # Need results from all OS/Node.js combinations
       matrix:
         os: [ubuntu-latest, ubuntu-20.04, windows-latest, macos-latest]
-        node-version: ['18.x', '20.x', '22.x', '23.x']
+        node-version: ['18', '20', '22']  # Use specific versions without .x
 
     steps:
       - name: Checkout repository
@@ -57,7 +57,7 @@ jobs:
       fail-fast: false  # Need results from all OS/Node.js combinations
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: ['18.x', '20.x', '22.x']
+        node-version: ['18', '20', '22']  # Use specific versions without .x
 
     steps:
       - name: Checkout repository
@@ -99,7 +99,7 @@ jobs:
       fail-fast: false  # Need results from all OS/Node.js combinations
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: ['18.x', '20.x', '22.x']
+        node-version: ['18', '20', '22']  # Use specific versions without .x
 
     steps:
       - name: Checkout repository
@@ -147,7 +147,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20'  # Use specific version without .x
 
       - name: Install package managers
         run: |
@@ -216,7 +216,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20'  # Use specific version without .x
           cache: 'npm'
           cache-dependency-path: 'sample-projects/monorepo/package-lock.json'
 
@@ -248,7 +248,7 @@ jobs:
       - name: Test npm registry configuration
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20'  # Use specific version without .x
           registry-url: 'https://registry.npmjs.org/'
 
       - name: Verify npm registry
@@ -259,7 +259,7 @@ jobs:
       - name: Test scoped registry configuration
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20'  # Use specific version without .x
           registry-url: 'https://npm.pkg.github.com'
           scope: '@octocat'
 
@@ -279,7 +279,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20'  # Use specific version without .x
 
       - name: Install package managers
         run: |
