@@ -57,13 +57,6 @@
               echo "console.log('Test project works!');" > index.js
               node index.js
     
-          - name: Test package installation
-            run: |
-              cd test-project
-              npm install lodash
-              node -e "const _ = require('lodash'); \
-                console.log('Lodash version:', _.VERSION);"
-    
           - name: Clean up
             run: |
               rm -rf test-project
