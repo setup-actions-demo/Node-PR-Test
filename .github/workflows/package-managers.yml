@@ -63,17 +63,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Enable Corepack
+        run: corepack enable
+          
+      - name: Install Yarn via Corepack
+        working-directory: sample-projects/typescript-yarn
+        run: corepack install
+
+      - name: Verify yarn installation
+        run: |
+          node --version
+          yarn --version
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
           cache-dependency-path: 'sample-projects/typescript-yarn/yarn.lock'
-
-      - name: Verify yarn installation
-        run: |
-          node --version
-          yarn --version
 
       - name: Install dependencies with yarn
         run: |
