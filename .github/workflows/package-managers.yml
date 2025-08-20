@@ -105,13 +105,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: 'sample-projects/esm-pnpm/pnpm-lock.yaml'
-
       - name: Install pnpm
         run: npm install -g pnpm
 
@@ -119,6 +112,14 @@ jobs:
         run: |
           node --version
           pnpm --version
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: 'sample-projects/esm-pnpm/pnpm-lock.yaml'
+
 
       - name: Install dependencies with pnpm
         run: |
