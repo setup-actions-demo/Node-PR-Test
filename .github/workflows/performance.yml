@@ -24,6 +24,7 @@
               echo "Starting Node.js setup benchmark..."
               start_time=$(date +%s%N)
               echo "START_TIME=${start_time}" >> $GITHUB_ENV
+            shell: bash
     
           - name: Setup Node.js ${{ matrix.node-version }}
             uses: actions/setup-node@v4
