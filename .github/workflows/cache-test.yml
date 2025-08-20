@@ -77,6 +77,9 @@
         steps:
           - name: Checkout repository
             uses: actions/checkout@v4
+
+          - name: Install pnpm
+            run: npm install -g pnpm
     
           - name: Setup Node.js
             uses: actions/setup-node@v4
@@ -85,8 +88,6 @@
               cache: 'pnpm'
               cache-dependency-path: 'sample-projects/esm-pnpm/pnpm-lock.yaml'
     
-          - name: Install pnpm
-            run: npm install -g pnpm
     
           - name: Install dependencies (first run)
             run: |
