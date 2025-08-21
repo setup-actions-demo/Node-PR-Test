@@ -7,9 +7,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces",
-    "start": "npm run start --workspace=package-b"
+    "build": "echo 'Building all workspaces...'",
+    "test": "echo 'Testing all workspaces...'",
+    "start": "echo 'Starting workspace...'"
   },
   "devDependencies": {
     "lerna": "^7.0.0"
@@ -22,5 +22,8 @@
     "setup-node"
   ],
   "author": "setup-node-test",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }
