@@ -96,24 +96,28 @@ jobs:
         run: |
           echo "=== First installation (cache miss expected) ==="
           time yarn install --immutable
+        shell: bash
   
       - name: Build TypeScript project
         working-directory: sample-projects/typescript-yarn
         run: |
           echo "=== Building TypeScript project ==="
           yarn build
+        shell: bash
   
       - name: Run tests
         working-directory: sample-projects/typescript-yarn
         run: |
           echo "=== Running tests ==="
           yarn test
+        shell: bash
   
       - name: Test TypeScript compilation (type checking)
         working-directory: sample-projects/typescript-yarn
         run: |
           echo "=== TypeScript type checking ==="
           yarn tsc --noEmit
+        shell: bash
   
       - name: Clear and reinstall (test cache effectiveness)
         working-directory: sample-projects/typescript-yarn
@@ -121,6 +125,7 @@ jobs:
           rm -rf node_modules
           echo "=== Second installation (cache hit expected) ==="
           time yarn install --immutable
+        shell: bash
   
       - name: Verify cache effectiveness
         working-directory: sample-projects/typescript-yarn
@@ -128,6 +133,7 @@ jobs:
           echo "=== Yarn cache information ==="
           yarn config get cacheFolder
           echo "=== Installation completed successfully ==="
+        shell: bash
   pnpm-matrix:
     name: pnpm testing on ${{ matrix.os }} with Node ${{ matrix.node-version }}
     runs-on: ${{ matrix.os }}
