@@ -2,7 +2,12 @@
     name: Cache Testing
     
     on:
-      workflow_dispatch:
+      push:
+        branches:
+          - main
+      pull_request:
+        branches:
+          - main
         
     jobs:
       cache-npm:
