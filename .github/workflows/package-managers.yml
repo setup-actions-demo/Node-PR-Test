@@ -311,16 +311,34 @@ jobs:
       - name: Install package managers
         run: |
           npm install -g yarn pnpm
+      
+      - name: Install dependencies (npm)
+        run: |
+          cd sample-projects/basic-npm
+          npm install
+
       - name: Test npm resolution
         run: |
           cd sample-projects/basic-npm
           npm ls
           npm explain lodash
+
+      - name: Install dependencies (yarn)
+        run: |
+          cd sample-projects/typescript-yarn
+          yarn install
+
       - name: Test yarn resolution
         run: |
           cd sample-projects/typescript-yarn
           yarn list
           yarn why typescript
+
+      - name: Install dependencies (pnpm)
+        run: |
+          cd sample-projects/esm-pnpm
+          pnpm install
+
       - name: Test pnpm resolution
         run: |
           cd sample-projects/esm-pnpm
