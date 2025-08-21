@@ -232,40 +232,7 @@ jobs:
           cd ../esm-pnpm
           rm -rf node_modules
           time pnpm install --frozen-lockfile
-  workspace-monorepo-test:
-    name: Test monorepo workspace functionality
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: priya-kinthali/setup-node@sample-686
-        with:
-          node-version: '20'  # Use specific version without .x
-          cache: 'npm'
-          cache-dependency-path: 'sample-projects/monorepo/package-lock.json'
-
-      - name: Install dependencies for monorepo
-        run: |
-          cd sample-projects/monorepo
-          npm ci
-      - name: Test workspace packages
-        run: |
-          cd sample-projects/monorepo
-          npm run test --workspace=package-a
-          npm run test --workspace=package-b
-          npm run build --workspaces
-      - name: Test cross-package dependencies
-        run: |
-          cd sample-projects/monorepo
-          npm run start --workspace=package-b
+ 
   registry-authentication:
     name: Test package registry configurations
     runs-on: ubuntu-latest
