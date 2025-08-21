@@ -17,5 +17,12 @@
     "package-b"
   ],
   "author": "setup-node-test",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "index.js",
+    "test.js"
+  ]
 }
