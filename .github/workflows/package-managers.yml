@@ -95,7 +95,8 @@ jobs:
             # Try to install with immutable first, fallback to regular install if needed
             yarn install --immutable || yarn install
           fi
-  
+        shell: bash
+        
       - name: Install dependencies with yarn (first run - cache miss expected)
         working-directory: sample-projects/typescript-yarn
         run: |
