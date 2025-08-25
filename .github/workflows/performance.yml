@@ -32,7 +32,7 @@
             shell: bash
     
           - name: Setup Node.js ${{ matrix.node-version }}
-            uses: priya-kinthali/setup-node@sample-686
+            uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: ${{ matrix.node-version }}
     
@@ -73,7 +73,7 @@
             uses: actions/checkout@v4
     
           - name: Setup Node.js with npm cache
-            uses: priya-kinthali/setup-node@sample-686
+            uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: '20.x'
               cache: 'npm'
@@ -107,7 +107,7 @@
             uses: actions/checkout@v4
     
           - name: Setup Node.js
-            uses: priya-kinthali/setup-node@sample-686
+            uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: '20.x'
     
@@ -163,7 +163,7 @@
               echo "Setting up Node.js..."
               ps aux --sort=-%mem | head -5 > before_setup.log
     
-          - uses: priya-kinthali/setup-node@sample-686
+          - uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: '20.x'
               cache: 'npm'
@@ -197,7 +197,7 @@
               echo "Testing Node.js version switching performance..."
     
           - name: Setup Node.js 18
-            uses: priya-kinthali/setup-node@sample-686
+            uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: '18.x'
           - run: |
@@ -205,7 +205,7 @@
               time node -e "console.log('Node 18 test')"
     
           - name: Switch to Node.js 20
-            uses: priya-kinthali/setup-node@sample-686
+            uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: '20.x'
           - run: |
@@ -213,7 +213,7 @@
               time node -e "console.log('Node 20 test')"
     
           - name: Switch to Node.js 22
-            uses: priya-kinthali/setup-node@sample-686
+            uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: '22.x'
           - run: |
@@ -221,7 +221,7 @@
               time node -e "console.log('Node 22 test')"
     
           - name: Switch back to Node.js 20
-            uses: priya-kinthali/setup-node@sample-686
+            uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: '20.x'
           - run: |
@@ -241,7 +241,7 @@
               echo "Testing concurrent Node.js operations..."
     
           - name: Setup Node.js for concurrent test
-            uses: priya-kinthali/setup-node@sample-686
+            uses: priya-kinthali/setup-node@package-manager-field-caching
             with:
               node-version: '20.x'
     

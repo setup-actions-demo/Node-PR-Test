@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: priya-kinthali/setup-node@sample-686
+        uses: priya-kinthali/setup-node@package-manager-field-caching
         with:
           node-version: ${{ matrix.node-version }}
 
